@@ -1,286 +1,332 @@
 describe("Redux", () => {
 
-	const jsonStoreComponent = {
-				template: `{{$ctrl.getJsonState()}}`,
-				controller: class JsonStoreController {
-					constructor(store) {
-						this.store = store;
-					}
-					getJsonState() {
-						return JSON.stringify(this.store.getState());
-					}
-				}
-			};
+    const jsonStoreComponent = {
+        template: `{{$ctrl.getJsonState()}}`,
+        controller: class JsonStoreController {
+            constructor(store) {
+                this.store = store;
+            }
+            getJsonState() {
+                return JSON.stringify(this.store.getState());
+            }
+        }
+    };
 
-	describe('state', () => {
+    describe('state', () => {
 
-		it('requires "com.drpicox.angularjs-redux" module and initial store.getState() is {}', () => {
-			const state = testbed
-				.use('com.drpicox.angularjs-redux')
-				.getState();
+        it('requires "com.drpicox.angularjs-redux" module and initial store.getState() is {}', () => {
+            const state = testbed
+                .use('com.drpicox.angularjs-redux')
+                .getState();
 
-			expect(solveme).toEqual(state);
-		});
+            expect({}).toEqual(state);
+        });
 
-		it('store can be injected', () => {
-			angular.module('jsonStateApp', ['com.drpicox.angularjs-redux'])
-				.component('jsonState', {
-						template: `{{$ctrl.getJsonState()}}`,
-						controller: class JsonStoreController {
-							constructor(store) {
-								this._store = store;
-							}
-							getJsonState() {
-								return JSON.stringify(this._store.getState());
-							}
-						}
-					});
+        it('store can be injected', () => {
+            angular.module('jsonStateApp', ['com.drpicox.angularjs-redux'])
+                .component('jsonState', {
+                    template: `{{$ctrl.getJsonState()}}`,
+                    controller: class JsonStoreController {
+                        constructor(store) {
+                            this._store = store;
+                        }
+                        getJsonState() {
+                            return JSON.stringify(this._store.getState());
+                        }
+                    }
+                });
 
-			const wrapper = testbed.use('jsonStateApp')
-				.compile('<json-state></json-state>');
+            const wrapper = testbed.use('jsonStateApp')
+                .compile('<json-state></json-state>');
 
-			expect(solveme).toBeTextOf(wrapper);
-		});
+            expect("{}").toBeTextOf(wrapper);
+        });
 
-	});
+    });
 
-	describe('reducer', () => {
-		it('you can configure a new reducer with initial value', () => {
-			angular.module('constantThreeApp', ['com.drpicox.angularjs-redux'])
-				.config((reducerProvider) => {
-					// here register a new reducer to the app state reducers
-					reducerProvider.add('constantThree', (state, action) => {
-						return 3;
-					});
-				});
+    describe('reducer', () => {
+        it('you can configure a new reducer with initial value', () => {
+            angular.module('constantThreeApp', ['com.drpicox.angularjs-redux'])
+                .config((reducerProvider) => {
+                    // here register a new reducer to the app state reducers
+                    reducerProvider.add('constantThree', (state, action) => {
+                        return 3;
+                    });
+                });
 
-			const state = testbed.use('constantThreeApp').getState();
-			expect(solveme).toEqual(state);
-		});
+            const state = testbed.use('constantThreeApp').getState();
+            expect({
+                constantThree: 3
+            }).toEqual(state);
+        });
 
-		it('you can configure multiple reducers', () => {
-			angular.module('zooApp.reducers.name', [])
-				.config((reducerProvider) => {
-					const initialState = 'Hoboken';
-					const nameReducer = (state = initialState, action) => {
-						return state;
-					};
-					reducerProvider.add('name', nameReducer);
-				});
+        it('you can configure multiple reducers', () => {
+            angular.module('zooApp.reducers.name', [])
+                .config((reducerProvider) => {
+                    const initialState = 'Hoboken';
+                    const nameReducer = (state = initialState, action) => {
+                        return state;
+                    };
+                    reducerProvider.add('name', nameReducer);
+                });
 
-			angular.module('zooApp.reducers.animals', [])
-				.config((reducerProvider) => {
-					const animalsReducer = (state = [], action) => {
-						return state;
-					};
-					reducerProvider.add('animals', animalsReducer);
-				});
+            angular.module('zooApp.reducers.animals', [])
+                .config((reducerProvider) => {
+                    const animalsReducer = (state = [], action) => {
+                        return state;
+                    };
+                    reducerProvider.add('animals', animalsReducer);
+                });
 
-			angular.module('zooApp.reducers', [
-				'com.drpicox.angularjs-redux',
+            angular.module('zooApp.reducers', [
+                'com.drpicox.angularjs-redux',
 
-				'zooApp.reducers.name',
-				'zooApp.reducers.animals',
-			]);
+                'zooApp.reducers.name',
+                'zooApp.reducers.animals',
+            ]);
 
-			const state = testbed.use('zooApp.reducers').getState();
-			expect(solveme).toEqual(state);
-		});
+            const state = testbed.use('zooApp.reducers').getState();
+            expect({
+                name: "Hoboken",
+                animals: []
+            }).toEqual(state);
+        });
 
-		it('reducers can respond to dispatched actions', () => {
-			angular.module('counterApp', ['com.drpicox.angularjs-redux'])
-				.config((reducerProvider) => {
-					const countReducer = (state = 0, action) => {
-						switch (action.type) {
-							case 'INCREMENT':
-								return state + 1;
-							default:
-								return state;
-						}
-					};
+        it('reducers can respond to dispatched actions', () => {
+            angular.module('counterApp', ['com.drpicox.angularjs-redux'])
+                .config((reducerProvider) => {
+                    const countReducer = (state = 0, action) => {
+                        switch (action.type) {
+                            case 'INCREMENT':
+                                return state + 1;
+                            default:
+                                return state;
+                        }
+                    };
 
-					reducerProvider.add('count', countReducer);
-				});
+                    reducerProvider.add('count', countReducer);
+                });
 
-			const state = testbed.use('counterApp')
-				.dispatch({type: 'INCREMENT'})
-				.getState();
+            const state = testbed.use('counterApp')
+                .dispatch({
+                    type: 'INCREMENT'
+                })
+                .getState();
 
-			expect(solveme).toEqual(state);		
-		});
+            expect({
+                count: 1
+            }).toEqual(state);
+        });
 
-		it('reducers never modify the state', () => {
-			angular.module('animalsApp', ['com.drpicox.angularjs-redux'])
-				.config((reducerProvider) => {
-					const animalsReducer = (state = [], action) => {						
-						switch (action.type) {
-							case 'ADD_ANIMAL':
-								return [...state, action.animal];
-							default:
-								return state;
-						}
-					};
+        it('reducers never modify the state', () => {
+            angular.module('animalsApp', ['com.drpicox.angularjs-redux'])
+                .config((reducerProvider) => {
+                    const animalsReducer = (state = [], action) => {
+                        switch (action.type) {
+                            case 'ADD_ANIMAL':
+                                return [...state, action.animal];
+                            default:
+                                return state;
+                        }
+                    };
 
-					reducerProvider.add('animals', animalsReducer);
-				});
+                    reducerProvider.add('animals', animalsReducer);
+                });
 
-			const state = testbed.use('animalsApp')
-				.dispatch({type: 'ADD_ANIMAL', animal: 'savio'})
-				.getState();
+            const state = testbed.use('animalsApp')
+                .dispatch({
+                    type: 'ADD_ANIMAL',
+                    animal: 'savio'
+                })
+                .getState();
 
-			expect(solveme).toEqual(state);		
-		});
+            expect({
+                animals: ["savio"]
+            }).toEqual(state);
+        });
 
-		it('reducers can use auxiliary reducers', () => {
-			angular.module('animalsApp', ['com.drpicox.angularjs-redux'])
-				.config((reducerProvider) => {
-					const animalReducer = (state = {}, action) => {
-						switch (action.type) {
-							case 'ADD_ANIMAL':
-								return {
-									name: action.name,
-									present: true
-								};
-							case 'BREAK_ANIMAL_OUT':
-								if (state.name !== action.name) {
-									return state;
-								}
+        it('reducers can use auxiliary reducers', () => {
+            angular.module('animalsApp', ['com.drpicox.angularjs-redux'])
+                .config((reducerProvider) => {
+                    const animalReducer = (state = {}, action) => {
+                        switch (action.type) {
+                            case 'ADD_ANIMAL':
+                                return {
+                                    name: action.name,
+                                    present: true
+                                };
+                            case 'BREAK_ANIMAL_OUT':
+                                if (state.name !== action.name) {
+                                    return state;
+                                }
 
-								// makes a copy of state and changes it
-								return Object.assign({}, state, {
-									present: false,
-								});
-							default:
-								return state;
-						}
-					};
-					
-					const animalsReducer = (state = [], action) => {						
-						switch (action.type) {
-							case 'ADD_ANIMAL':
-								return [...state, animalReducer(undefined, action)];
-							case 'BREAK_ANIMAL_OUT':
-								return state.map(animal => animalReducer(animal, action));
-							default:
-								return state;
-						}
-					};
+                                // makes a copy of state and changes it
+                                return Object.assign({}, state, {
+                                    present: false,
+                                });
+                            default:
+                                return state;
+                        }
+                    };
 
-					reducerProvider.add('animals', animalsReducer);
-				});
+                    const animalsReducer = (state = [], action) => {
+                        switch (action.type) {
+                            case 'ADD_ANIMAL':
+                                return [...state, animalReducer(undefined, action)];
+                            case 'BREAK_ANIMAL_OUT':
+                                return state.map(animal => animalReducer(animal, action));
+                            default:
+                                return state;
+                        }
+                    };
 
-			const state = testbed.use('animalsApp')
-				.dispatch({type: 'ADD_ANIMAL', name: 'savio'})
-				.dispatch({type: 'ADD_ANIMAL', name: 'lulu'})
-				.dispatch({type: 'BREAK_ANIMAL_OUT', name: 'savio'})
-				.getState();
+                    reducerProvider.add('animals', animalsReducer);
+                });
 
-			expect(solveme).toEqual(state);		
-		});
-	});
+            const state = testbed.use('animalsApp')
+                .dispatch({
+                    type: 'ADD_ANIMAL',
+                    name: 'savio'
+                })
+                .dispatch({
+                    type: 'ADD_ANIMAL',
+                    name: 'lulu'
+                })
+                .dispatch({
+                    type: 'BREAK_ANIMAL_OUT',
+                    name: 'savio'
+                })
+                .getState();
 
-	describe('dispatcher', () => {
+            expect({
+                animals: [{
+                    name: "savio",
+                    present: false
+                }, {
+                    name: "lulu",
+                    present: true
+                }]
+            }).toEqual(state);
+        });
+    });
 
-		it('you can create reusable action dispatchers', () => {
-			angular.module('counterApp', ['com.drpicox.angularjs-redux'])
-				.config((dispatcherProvider) => {
-					dispatcherProvider.add('increment', () => {
-						return { type: 'INCREMENT' };
-					});
-				});
+    describe('dispatcher', () => {
 
-			const dispatcher = testbed.use('counterApp').getService('dispatcher');
+        it('you can create reusable action dispatchers', () => {
+            angular.module('counterApp', ['com.drpicox.angularjs-redux'])
+                .config((dispatcherProvider) => {
+                    dispatcherProvider.add('increment', () => {
+                        return {
+                            type: 'INCREMENT'
+                        };
+                    });
+                });
 
-			dispatcher.increment();
-			expect(solveme).toEqual(testbed.getLastDispatchedAction());
-		});
+            const dispatcher = testbed.use('counterApp').getService('dispatcher');
 
-		it('action constructor for dispatch can have parameters', () => {
-			angular.module('counterApp', ['com.drpicox.angularjs-redux'])
-				.config((dispatcherProvider) => {
-					dispatcherProvider.add('addAnimal', (name) => {
-						return { 
-							type: 'ADD_ANIMAL',
-							name: name,
-						};
-					});
-				});
+            dispatcher.increment();
+            expect({
+                type: "INCREMENT"
+            }).toEqual(testbed.getLastDispatchedAction());
+        });
 
-			const dispatcher = testbed.use('counterApp').getService('dispatcher');
+        it('action constructor for dispatch can have parameters', () => {
+            angular.module('counterApp', ['com.drpicox.angularjs-redux'])
+                .config((dispatcherProvider) => {
+                    dispatcherProvider.add('addAnimal', (name) => {
+                        return {
+                            type: 'ADD_ANIMAL',
+                            name: name,
+                        };
+                    });
+                });
 
-			dispatcher.addAnimal('savio');
-			expect(solveme).toEqual(testbed.getLastDispatchedAction());
-		});
+            const dispatcher = testbed.use('counterApp').getService('dispatcher');
 
-		it('dispatched actions triggers reducers', () => {
-			angular.module('counterApp.actions', [])
-				.config((dispatcherProvider) => {
-					dispatcherProvider.add('increment', () => {
-						return { type: 'INCREMENT' };
-					});
-				});
+            dispatcher.addAnimal('savio');
+            expect({
+                type: 'ADD_ANIMAL',
+                name: "savio"
+            }).toEqual(testbed.getLastDispatchedAction());
+        });
 
-			angular.module('counterApp.reducers', [])
-				.config((reducerProvider) => {
-					const countReducer = (state = 0, action) => {
-						switch (action.type) {
-							case 'INCREMENT':
-								return state + 1;
-							default:
-								return state;
-						}
-					};
+        it('dispatched actions triggers reducers', () => {
+            angular.module('counterApp.actions', [])
+                .config((dispatcherProvider) => {
+                    dispatcherProvider.add('increment', () => {
+                        return {
+                            type: 'INCREMENT'
+                        };
+                    });
+                });
 
-					reducerProvider.add('count', countReducer);
-				});
+            angular.module('counterApp.reducers', [])
+                .config((reducerProvider) => {
+                    const countReducer = (state = 0, action) => {
+                        switch (action.type) {
+                            case 'INCREMENT':
+                                return state + 1;
+                            default:
+                                return state;
+                        }
+                    };
 
-			angular.module('counterApp', [
-					'com.drpicox.angularjs-redux',
+                    reducerProvider.add('count', countReducer);
+                });
 
-					'counterApp.actions',
-					'counterApp.reducers',
-				])
+            angular.module('counterApp', [
+                'com.drpicox.angularjs-redux',
 
-			const dispatcher = testbed.use('counterApp').getService('dispatcher');
+                'counterApp.actions',
+                'counterApp.reducers',
+            ])
 
-			dispatcher.increment();
-			expect(solveme).toEqual(testbed.getState())
-		});
+            const dispatcher = testbed.use('counterApp').getService('dispatcher');
 
-		it('dispatcher can be injected and used into controllers', () => {
-			angular.module('counterApp.actions', [])
-				.config((dispatcherProvider) => {
-					dispatcherProvider.add('increment', () => {
-						return { type: 'INCREMENT' };
-					});
-				});
+            dispatcher.increment();
+            expect({
+                count: 1
+            }).toEqual(testbed.getState())
+        });
 
-			angular.module('counterApp.components', [])
-				.component('incrementer', {
-					template: `<button ng-click="$ctrl.increment()"></button>`,
-					controller: class IncrementerController {
-						constructor(dispatcher) {
-							this._dispatcher = dispatcher;
-						}
-						increment() {
-							this._dispatcher.increment();
-						}
-					}
-				});
+        it('dispatcher can be injected and used into controllers', () => {
+            angular.module('counterApp.actions', [])
+                .config((dispatcherProvider) => {
+                    dispatcherProvider.add('increment', () => {
+                        return {
+                            type: 'INCREMENT'
+                        };
+                    });
+                });
 
-			angular.module('counterApp', [
-					'com.drpicox.angularjs-redux',
+            angular.module('counterApp.components', [])
+                .component('incrementer', {
+                    template: `<button ng-click="$ctrl.increment()"></button>`,
+                    controller: class IncrementerController {
+                        constructor(dispatcher) {
+                            this._dispatcher = dispatcher;
+                        }
+                        increment() {
+                            this._dispatcher.increment();
+                        }
+                    }
+                });
 
-					'counterApp.actions',
-					'counterApp.components',
-				]);
+            angular.module('counterApp', [
+                'com.drpicox.angularjs-redux',
 
-			const wrapper = testbed.use('counterApp')
-				.compile('<incrementer></incrementer>');
+                'counterApp.actions',
+                'counterApp.components',
+            ]);
 
-			wrapper.click('button');
-			expect(solveme).toEqual(testbed.getLastDispatchedAction());
-		});
-	});
+            const wrapper = testbed.use('counterApp')
+                .compile('<incrementer></incrementer>');
+
+            wrapper.click('button');
+            expect({
+                type: "INCREMENT"
+            }).toEqual(testbed.getLastDispatchedAction());
+        });
+    });
 
 });
