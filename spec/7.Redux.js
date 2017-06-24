@@ -284,7 +284,9 @@ describe("Redux", () => {
             const dispatcher = testbed.use('counterApp').getService('dispatcher');
 
             dispatcher.increment();
-            expect({count: 1}).toEqual(testbed.getState())
+            expect({
+                count: 1
+            }).toEqual(testbed.getState())
         });
 
         it('dispatcher can be injected and used into controllers', () => {
@@ -321,7 +323,9 @@ describe("Redux", () => {
                 .compile('<incrementer></incrementer>');
 
             wrapper.click('button');
-            expect({type: "INCREMENT"}).toEqual(testbed.getLastDispatchedAction());
+            expect({
+                type: "INCREMENT"
+            }).toEqual(testbed.getLastDispatchedAction());
         });
     });
 
