@@ -1,252 +1,259 @@
 // we are using reselect library https://github.com/reactjs/reselect
 describe("Selectors", () => {
 
-	beforeEach(() => {
-		angular.module('zooApp.actions', [
-			'zooApp.actions.addAnimal',
-			'zooApp.actions.breakAnimalOut',
-			'zooApp.actions.setName',
-		]);
+    beforeEach(() => {
+        angular.module('zooApp.actions', [
+            'zooApp.actions.addAnimal',
+            'zooApp.actions.breakAnimalOut',
+            'zooApp.actions.setName',
+        ]);
 
-		angular.module('zooApp.actions.addAnimal', [])
-			.config((dispatcherProvider) => {
-					const addAnimal = (name) => {
-						return {
-							type: 'ADD_ANIMAL',
-							name: name,
-						};
-					};
+        angular.module('zooApp.actions.addAnimal', [])
+            .config((dispatcherProvider) => {
+                const addAnimal = (name) => {
+                    return {
+                        type: 'ADD_ANIMAL',
+                        name: name,
+                    };
+                };
 
-					dispatcherProvider.add('addAnimal', addAnimal);
-				});
+                dispatcherProvider.add('addAnimal', addAnimal);
+            });
 
-		angular.module('zooApp.actions.breakAnimalOut', [])
-			.config((dispatcherProvider) => {
-					const breakAnimalOut = (name) => {
-						return {
-							type: 'BREAK_ANIMAL_OUT',
-							name: name,
-						};
-					};
+        angular.module('zooApp.actions.breakAnimalOut', [])
+            .config((dispatcherProvider) => {
+                const breakAnimalOut = (name) => {
+                    return {
+                        type: 'BREAK_ANIMAL_OUT',
+                        name: name,
+                    };
+                };
 
-					dispatcherProvider.add('breakAnimalOut', breakAnimalOut);
-				});
+                dispatcherProvider.add('breakAnimalOut', breakAnimalOut);
+            });
 
-		angular.module('zooApp.actions.setName', [])
-			.config((dispatcherProvider) => {
-					const setName = (name) => {
-						return {
-							type: 'SET_NAME',
-							name: name,
-						};
-					};
+        angular.module('zooApp.actions.setName', [])
+            .config((dispatcherProvider) => {
+                const setName = (name) => {
+                    return {
+                        type: 'SET_NAME',
+                        name: name,
+                    };
+                };
 
-					dispatcherProvider.add('setName', setName);
-				});
+                dispatcherProvider.add('setName', setName);
+            });
 
-	});
+    });
 
-	beforeEach(() => {
-		angular.module('zooApp.reducers', [
-			'zooApp.reducers.animals',
-			'zooApp.reducers.name',
-		]);
+    beforeEach(() => {
+        angular.module('zooApp.reducers', [
+            'zooApp.reducers.animals',
+            'zooApp.reducers.name',
+        ]);
 
-		angular.module('zooApp.reducers.animals', [])
-			.config((reducerProvider) => {
-				const animalReducer = (state = {}, action) => {
-					switch (action.type) {
-						case 'ADD_ANIMAL':
-							return {
-								name: action.name,
-								present: true
-							};
-						case 'BREAK_ANIMAL_OUT':
-							if (state.name !== action.name) {
-								return state;
-							}
+        angular.module('zooApp.reducers.animals', [])
+            .config((reducerProvider) => {
+                const animalReducer = (state = {}, action) => {
+                    switch (action.type) {
+                        case 'ADD_ANIMAL':
+                            return {
+                                name: action.name,
+                                present: true
+                            };
+                        case 'BREAK_ANIMAL_OUT':
+                            if (state.name !== action.name) {
+                                return state;
+                            }
 
-							return Object.assign({}, state, {
-								present: false,
-							});
-						default:
-							return state;
-					}
-				};
-				
-				const animalsReducer = (state = [
-						{ name: 'savio', present: true },
-					], action) => {						
-					switch (action.type) {
-						case 'ADD_ANIMAL':
-							return [...state, animalReducer(undefined, action)];
-						case 'BREAK_ANIMAL_OUT':
-							return state.map(animal => animalReducer(animal, action));
-						default:
-							return state;
-					}
-				};
+                            return Object.assign({}, state, {
+                                present: false,
+                            });
+                        default:
+                            return state;
+                    }
+                };
 
-				reducerProvider.add('animals', animalsReducer);
-			});
+                const animalsReducer = (state = [{
+                    name: 'savio',
+                    present: true
+                }, ], action) => {
+                    switch (action.type) {
+                        case 'ADD_ANIMAL':
+                            return [...state, animalReducer(undefined, action)];
+                        case 'BREAK_ANIMAL_OUT':
+                            return state.map(animal => animalReducer(animal, action));
+                        default:
+                            return state;
+                    }
+                };
 
-		angular.module('zooApp.reducers.name', [])
-			.config((reducerProvider) => {
-				const nameReducer = (state = 'Hoboken', action) => {						
-					switch (action.type) {
-						case 'SET_NAME':
-							return action.name;
-						default:
-							return state;
-					}
-				};
+                reducerProvider.add('animals', animalsReducer);
+            });
 
-				reducerProvider.add('name', nameReducer);
-			});
-	});
+        angular.module('zooApp.reducers.name', [])
+            .config((reducerProvider) => {
+                const nameReducer = (state = 'Hoboken', action) => {
+                    switch (action.type) {
+                        case 'SET_NAME':
+                            return action.name;
+                        default:
+                            return state;
+                    }
+                };
 
-	it('selector has a default getter that returns the state', () => {
-		angular.module('zooApp', [
-				'com.drpicox.angularjs-redux',
+                reducerProvider.add('name', nameReducer);
+            });
+    });
 
-				'zooApp.actions',
-				'zooApp.reducers',
-			]);
+    it('selector has a default getter that returns the state', () => {
+        angular.module('zooApp', [
+            'com.drpicox.angularjs-redux',
 
-		const selector = testbed.use('zooApp').getService('selector');
-		expect(solveme).toEqual(selector.getState());
-	});
+            'zooApp.actions',
+            'zooApp.reducers',
+        ]);
 
-	it('a selector can be configured to get a simple partial retrieval', () => {
-		angular.module('zooApp.selectors', [])
-			.config((selectorProvider) => {
-				const getName = (state) => {
-					return state.name;
-				};
+        const selector = testbed.use('zooApp').getService('selector');
+        expect({
+            name: "Hoboken",
+            animals: [{
+                name: "savio",
+                present: true
+            }]
+        }).toEqual(selector.getState());
+    });
 
-				selectorProvider.add('getName', getName);
-			});
+    it('a selector can be configured to get a simple partial retrieval', () => {
+        angular.module('zooApp.selectors', [])
+            .config((selectorProvider) => {
+                const getName = (state) => {
+                    return state.name;
+                };
 
-		angular.module('zooApp', [
-				'com.drpicox.angularjs-redux',
+                selectorProvider.add('getName', getName);
+            });
 
-				'zooApp.actions',
-				'zooApp.reducers',
-				'zooApp.selectors',
-			]);
+        angular.module('zooApp', [
+            'com.drpicox.angularjs-redux',
 
-		const selector = testbed.use('zooApp').getService('selector');
-		expect(solveme).toEqual(selector.getName());
-	});
+            'zooApp.actions',
+            'zooApp.reducers',
+            'zooApp.selectors',
+        ]);
 
-	it('a selector can return computed data', () => {
-		angular.module('zooApp.selectors', [])
-			.config((selectorProvider) => {
-				const getAnimalNames = (state) => {
-					return state.animals.map(animal => animal.name);
-				};
+        const selector = testbed.use('zooApp').getService('selector');
+        expect("Hoboken").toEqual(selector.getName());
+    });
 
-				selectorProvider.add('getAnimalNames', getAnimalNames);
-			});
+    it('a selector can return computed data', () => {
+        angular.module('zooApp.selectors', [])
+            .config((selectorProvider) => {
+                const getAnimalNames = (state) => {
+                    return state.animals.map(animal => animal.name);
+                };
 
-		angular.module('zooApp', [
-				'com.drpicox.angularjs-redux',
+                selectorProvider.add('getAnimalNames', getAnimalNames);
+            });
 
-				'zooApp.actions',
-				'zooApp.reducers',
-				'zooApp.selectors',
-			]);
+        angular.module('zooApp', [
+            'com.drpicox.angularjs-redux',
 
-		const selector = testbed.use('zooApp').getService('selector');
-		expect(solveme).toEqual(selector.getAnimalNames());
-	});
+            'zooApp.actions',
+            'zooApp.reducers',
+            'zooApp.selectors',
+        ]);
 
-	it('a selector are injected of other getter selectors results as inputs', () => {
+        const selector = testbed.use('zooApp').getService('selector');
+        expect(["savio"]).toEqual(selector.getAnimalNames());
+    });
 
-		angular.module('zooApp.selectors', [
-			'zooApp.selectors.getAnimals',
-			'zooApp.selectors.getPresentAnimalNames',
-		]);
+    it('a selector are injected of other getter selectors results as inputs', () => {
 
-		angular.module('zooApp.selectors.getAnimals', [])
-			.config((selectorProvider) => {
-				const getAnimals = (state) => {
-					return state.animals;
-				};
+        angular.module('zooApp.selectors', [
+            'zooApp.selectors.getAnimals',
+            'zooApp.selectors.getPresentAnimalNames',
+        ]);
 
-				selectorProvider.add('getAnimals', getAnimals);
-			});
+        angular.module('zooApp.selectors.getAnimals', [])
+            .config((selectorProvider) => {
+                const getAnimals = (state) => {
+                    return state.animals;
+                };
 
-		angular.module('zooApp.selectors.getPresentAnimalNames', [])
-			.config((selectorProvider) => {
-				const getPresentAnimalNames = (animals) => {
-					return animals
-						.filter(animal => animal.present)
-						.map(animal => animal.name);
-				};
+                selectorProvider.add('getAnimals', getAnimals);
+            });
 
-				selectorProvider.add('getPresentAnimalNames', getPresentAnimalNames);
-			});
+        angular.module('zooApp.selectors.getPresentAnimalNames', [])
+            .config((selectorProvider) => {
+                const getPresentAnimalNames = (animals) => {
+                    return animals
+                        .filter(animal => animal.present)
+                        .map(animal => animal.name);
+                };
 
-		angular.module('zooApp', [
-				'com.drpicox.angularjs-redux',
+                selectorProvider.add('getPresentAnimalNames', getPresentAnimalNames);
+            });
 
-				'zooApp.actions',
-				'zooApp.reducers',
-				'zooApp.selectors',
-			]);
+        angular.module('zooApp', [
+            'com.drpicox.angularjs-redux',
 
-		const selector = testbed.use('zooApp').getService('selector');
-		expect(solveme).toEqual(selector.getPresentAnimalNames());
-	});
+            'zooApp.actions',
+            'zooApp.reducers',
+            'zooApp.selectors',
+        ]);
 
-	it('a selectors react to state changes', () => {
+        const selector = testbed.use('zooApp').getService('selector');
+        expect(["savio"]).toEqual(selector.getPresentAnimalNames());
+    });
 
-		angular.module('zooApp.selectors', [
-			'zooApp.selectors.getAnimals',
-			'zooApp.selectors.getPresentAnimalNames',
-		]);
+    it('a selectors react to state changes', () => {
 
-		angular.module('zooApp.selectors.getAnimals', [])
-			.config((selectorProvider) => {
-				const getAnimals = (state) => {
-					return state.animals;
-				};
+        angular.module('zooApp.selectors', [
+            'zooApp.selectors.getAnimals',
+            'zooApp.selectors.getPresentAnimalNames',
+        ]);
 
-				selectorProvider.add('getAnimals', getAnimals);
-			});
+        angular.module('zooApp.selectors.getAnimals', [])
+            .config((selectorProvider) => {
+                const getAnimals = (state) => {
+                    return state.animals;
+                };
 
-		angular.module('zooApp.selectors.getPresentAnimalNames', [])
-			.config((selectorProvider) => {
-				const getPresentAnimalNames = (animals) => {
-					return animals
-						.filter(animal => animal.present)
-						.map(animal => animal.name);
-				};
+                selectorProvider.add('getAnimals', getAnimals);
+            });
 
-				selectorProvider.add('getPresentAnimalNames', getPresentAnimalNames);
-			});
+        angular.module('zooApp.selectors.getPresentAnimalNames', [])
+            .config((selectorProvider) => {
+                const getPresentAnimalNames = (animals) => {
+                    return animals
+                        .filter(animal => animal.present)
+                        .map(animal => animal.name);
+                };
 
-		angular.module('zooApp', [
-				'com.drpicox.angularjs-redux',
+                selectorProvider.add('getPresentAnimalNames', getPresentAnimalNames);
+            });
 
-				'zooApp.actions',
-				'zooApp.reducers',
-				'zooApp.selectors',
-			]);
+        angular.module('zooApp', [
+            'com.drpicox.angularjs-redux',
 
-		testbed.use('zooApp');
-		const selector = testbed.getService('selector');
-		const dispatcher = testbed.getService('dispatcher');
+            'zooApp.actions',
+            'zooApp.reducers',
+            'zooApp.selectors',
+        ]);
 
-		expect(solveme).toEqual(selector.getPresentAnimalNames());
+        testbed.use('zooApp');
+        const selector = testbed.getService('selector');
+        const dispatcher = testbed.getService('dispatcher');
 
-		dispatcher.addAnimal('lulu');
-		expect(solveme).toEqual(selector.getPresentAnimalNames());
+        expect(["savio"]).toEqual(selector.getPresentAnimalNames());
 
-		dispatcher.breakAnimalOut('savio');
-		expect(solveme).toEqual(selector.getPresentAnimalNames());
-	});
+        dispatcher.addAnimal('lulu');
+        expect(["savio", "lulu"]).toEqual(selector.getPresentAnimalNames());
+
+        dispatcher.breakAnimalOut('savio');
+        expect(["lulu"]).toEqual(selector.getPresentAnimalNames());
+    });
 
 
 });
